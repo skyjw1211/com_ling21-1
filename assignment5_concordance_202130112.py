@@ -1,8 +1,24 @@
 import re
 
+token = ''
+left_context_leng = ''
+right_context_leng = ''
+
 #input
-token = input('찾을 토큰을 입력해주세요: ') #token값 입력 받기
-context_leng = int(input('문맥의 범위을 입력해주세요.(숫자): ')) #context 범위 입력받기
+while token == '':
+    token = input('찾을 토큰을 입력해주세요: ') #token값 입력 받기
+
+while left_context_leng == '':
+    try:
+        left_context_leng = int(input('왼쪽 문맥의 범위을 입력해주세요.(숫자): ')) #context 범위 입력받기
+    except:
+        continue
+
+while right_context_leng == '':
+    try:
+        right_context_leng = int(input('오른쪽 문맥의 범위을 입력해주세요.(숫자): ')) #context 범위 입력받기
+    except:
+        continue
 
 
 #불러오기
@@ -17,7 +33,7 @@ corpus_changed = re.sub(r'({tok}\S*)'.format(tok = token),r'<<<\1>>>',corpus)
 lines = corpus_changed.split('\n')
 
 result = [] #여기에 결과값(concordance line)이 포함된 텍스트가 들어감.
-regex_str = r'((?:\S+ ){0,%d}<<<%s\S*>>>(?: \S+){0,%d})'% (context_leng, token, context_leng) #입력값으로 포매팅
+regex_str = r'((?:\S+ ){0,%d}<<<%s\S*>>>(?: \S+){0,%d})'% (left_context_leng, token, right_context_leng) #입력값으로 포매팅
 concords= re.compile(regex_str) #최대 n의 문맥을 갖는 정규 표현식 컴파일
 
 
@@ -35,7 +51,7 @@ right_context_ls = [] #오른쪽 문맥
 
 
 for sent in result:
-    p_split_context = re.compile(r'((?:\S+ ){0,%d})(<<<%s\S*>>>)((?: \S+){0,%d})'% (context_leng, token, context_leng)) # 양 옆 문맥과 가운데 토큰으로 나눔
+    p_split_context = re.compile(r'((?:\S+ ){0,%d})(<<<%s\S*>>>)((?: \S+){0,%d})'% (left_context_leng, token, right_context_leng)) # 양 옆 문맥과 가운데 토큰으로 나눔
 
     left, center, right = p_split_context.findall(sent)[0] #리스트 내에 튜플 형식으로 되어 있음
     
@@ -45,20 +61,27 @@ for sent in result:
     
 #각 문맥별 최대 길이
 left_max_len = max(list(map(lambda x: len(x), left_context_ls)))
-right_max_len = max(list(map(lambda x: len(x), left_context_ls)))
+right_max_len = max(list(map(lambda x: len(x), right_context_ls)))
 all_max = max(left_max_len, right_max_len)
+
+#토큰 최대 길이
+token_max_len = max(list(map(lambda x: len(x), search_token_ls)))
 
 #최대 문맥 길이로 포맷팅 형식에 넣어준다.
 left_format = "%{max_len}s".format(max_len = all_max)
 right_format = "%-{max_len}s".format(max_len = all_max)
 
+#최대 토큰 길이로 포맷팅 형식에 넣어주기
+center_format = "%-{max_len}s".format(max_len = token_max_len)
+
 #가장 긴 문맥의 길이를 기준으로 포맷팅 해준다. 
 left_contexts = list(map(lambda x: left_format % x, left_context_ls))
+search_tokens = list(map(lambda x: center_format % x, search_token_ls))
 right_contexts = list(map(lambda x: right_format % x, right_context_ls))
 
 res = []
 for i in range(len(search_token_ls)):
-    res.append(left_contexts[i] + ' ' + search_token_ls[i] + ' ' + right_contexts[i])
+    res.append(left_contexts[i] + ' ' + search_tokens[i] + '\t' + right_contexts[i])
 
 #line을 하나의 text로, \n로 구분자를 주어 concordance들이 다른 line으로 분리되도록 하였다.
 corpus_result = '\n'.join(res)
