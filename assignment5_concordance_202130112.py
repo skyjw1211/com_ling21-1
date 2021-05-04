@@ -11,7 +11,7 @@ while token == '':
 while left_context_leng == '':
     try:
         left_context_leng = int(input('왼쪽 문맥의 범위을 입력해주세요.(숫자): ')) #context 범위 입력받기
-    except:
+    except: #숫자 아닌 입력이 들어왔을 때 계속됨
         continue
 
 while right_context_leng == '':

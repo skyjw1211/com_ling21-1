@@ -23,10 +23,10 @@ class porter_stemmer:
     #stem에서 VC 발견하면 cnt+1, stem돌면서 현재 state(v인지)
 
     ## 모든 문자열은 알파벳임을 전제, 
-    #현재 상태 v > not v 만남 = m+1, state= not v
-    #현재 상태 v > v 만남 = 다음 진행
-    #현재 상태 not v > v 만남 = state = v
-    #현재 상태 not v > not v 만남 = 다음 진행
+    #현재 상태 v > not v 만남 => m+=1, state= not v
+    #현재 상태 v > v 만남 => 다음 진행
+    #현재 상태 not v > v 만남 => state = v
+    #현재 상태 not v > not v 만남 => 다음 진행
     # vowels = ['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U']
 
     def count_m(self, temp_stem):
@@ -57,7 +57,7 @@ class porter_stemmer:
         stemmed = token #stemming이 적용되지 않으면 원래 토큰 리턴
 
         #가장 긴 조건을 먼저 검사 함으로써 logest match 가 진행되도록 한다.
-        if self.temp_stemming(token, 'sses') != token:
+        if self.temp_stemming(token, 'sses') != token: #stemming을 임시적으로 작동 후 sses로 끝나는 token인지 확인, sses가 포함되는 토큰이면 진행
             stemmed = self.rule_apply(token, 'sses', 'ss')
 
         elif self.temp_stemming(token, 'ies') != token:
